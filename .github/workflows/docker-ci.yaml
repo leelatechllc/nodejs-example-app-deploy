@@ -25,6 +25,8 @@ jobs:
 
       - name: Run a one-line script
         run: ls
+      - name: Tell my name
+        run: echo "My name is ${{ env.NAME }}"        
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
