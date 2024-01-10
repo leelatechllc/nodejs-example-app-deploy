@@ -17,6 +17,7 @@ jobs:
       - Linux
       - X64
       - self-hosted
+      - USA
     # Service containers to run alongside the job
     # services:
     #   aws-sqs:
