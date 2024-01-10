@@ -1,15 +1,16 @@
-name: Docker Build
-
+name: docker-ci
 on:
-  workflow_call:
+  push:
+    branches: main
+  pull_request:
+    branches: dev
 env:
   MAVEN_OPTS: "-Xms1024m -Xmx2048m -XX:+UseG1GC -XX:+UseStringDeduplication -noverify -Dmaven.artifact.threads=50 -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryhandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=240 -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true"
   _JAVA_OPTIONS: "-Djava.io.tmpdir=/tmp/"
   NAME: "Juan"
-
 jobs:
-  build-test:
-    name: Build and Test
+  build:
+    name: Build
     defaults:
       run:
         shell: bash
@@ -18,170 +19,37 @@ jobs:
       - X64
       - self-hosted
       - USA
-    # Service containers to run alongside the job
-    # services:
-    #   aws-sqs:
-    #     image: roribio16/alpine-sqs:latest
-    #   elasticsearch:
-    #     image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
-    #     env:
-    #       xpack.security.enabled: "false"
-    #       transport.host: "127.0.0.1"
-    #       bootstrap.memory_lock: "true"
-    #       ES_JAVA_OPTS: "-Xms512m -Xmx1024m"
 
-    #   memcached:
-    #     image: bitnami/memcached:1.5.16
-    #     ports:
-    #       - 11211:11211
-
-    #   mysql:
-    #     image: docker://190405961846.dkr.ecr.us-west-2.amazonaws.com/svc/mysql:mysql-5.7
-    #     env:
-    #       MYSQL_ROOT_PASSWORD: "root"
-    #       MYSQL_DATABASE: "integrationtest"
-    #     ports:
-    #       - 3306:3306
-
-    #   postgres:
-    #     image: postgres:11.10
-    #     env:
-    #       POSTGRES_PASSWORD: "postgres"
-    #     options: >-
-    #       --health-cmd pg_isready
-    #       --health-interval 10s
-    #       --health-timeout 5s
-    #       --health-retries 5  
-    #     ports:
-    #       - 5432:5432
-
-    #   redis:
-    #     image: redis:5.0-alpine
-    #     ports:
-    #       - 6379:6379
     steps:
-      - name: Change permissions
-        run: sudo chown -R $USER:$USER /opt/github-actions-runner/_work/
-        shell: bash
-        
-      - name: Clean Workspace
-        run: |
-          set -ex
-          rm -rf "${{ github.workspace }}"
-          mkdir -p "${{ github.workspace }}"
-      - name: List directory content
-        run: |
-          ls -lash
-      - name: List directory content
-        run: |
-          echo ${NAME}   
-          
-      # - name: Setup Maven Action
-      #   uses: s4u/setup-maven-action@v1.4.0
-      #   with:
-      #     java-distribution: zulu
-      #     java-version: ${{ inputs.java-version }}
-      #     maven-version: 3.6.2
-      #     settings-servers: |
-      #       [{
-      #        "id": "nexus",
-      #        "username": "${{ secrets.nexus-username }}",
-      #        "password": "${{ secrets.nexus-password }}"
-      #       }]
-      #     settings-mirrors: |
-      #       [{
-      #        "id": "nexus",
-      #        "name": "nexus_mirror",
-      #        "mirrorOf": "*",
-      #        "url": "https://nexus.fff-svc.com/repository/mvn-fff/"
-      #       }]
-      # - name: Check libraries for growth
-      #   if: inputs.ecr-repository == 'honeycomb/growth-api'
-      #   run: |
-      #     [[ ! -f /usr/lib/ld-musl-x86_64.so.1 ]] && (wget https://musl.libc.org/releases/musl-1.2.3.tar.gz && tar xzvf musl-1.2.3.tar.gz && cd musl-1.2.3 && ./configure && sudo make && sudo make install) || echo "Library already installed"
-          
-      # - name: Download dependencies and build jar
-      #   run: mvn -T 1C -DskipTests --no-transfer-progress -DskipDocker clean package
-        
-      # - name: Run Tests
-      #   run: mvn verify -T 1C --no-transfer-progress -DskipDocker -Ddockerfile.skip=true
-                 
-      # - name: Run Analysis
-      #   run: mvn -T 1C --no-transfer-progress -DskipDocker -Ddockerfile.skip=true jxr:jxr pmd:pmd pmd:cpd spotbugs:spotbugs checkstyle:checkstyle jacoco:report
+      - uses: actions/checkout@v4
+
+      - name: Run a one-line script
+        run: ls
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2.5.0
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Nexus Container Registry
+        uses: docker/login-action@v3
         with:
-          version: latest
-          buildkitd-flags: '--allow-insecure-entitlement network.host'
-          driver-opts: |
-            network=host
-            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
+          registry: ${{ secrets.DOCKER_REGISTRY_URL}}
+          username: ${{ secrets.DOCKER_USER}}
+          password: ${{ secrets.DOCKER_PASS}}
+      - name: Sets datetime tag
+        run: echo "_DATE=$(date +%m%d%Y_%H%M)" >> $GITHUB_ENV
+        
+      - name: Shows datetime tag
+        run: echo ${{ env._DATE }}
 
-      # - name: Build
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     cache-from: type=gha, scope=${{ github.workflow }}
-      #     cache-to: type=gha, mode=max, scope=${{ github.workflow }}
-      #     context: ${{ inputs.dockerfile-context }}
-      #     file: ${{ inputs.dockerfile-path }}
-      #     push: ${{ inputs.docker-push }}
-      #     tags: ${{ inputs.aws-account-id }}.dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/${{ inputs.ecr-repository }}:${{ github.event.pull_request.number }}-${{ github.event.pull_request.base.ref }}
-      #     network: host
-      #     allow: network.host
-      #     provenance: false
-          
-      # - name: Disable annotations
-      #   working-directory: ${{ github.workspace }}/target
-      #   run: |
-      #     sed -i 's/github-actions-runner/tmp/g' spotbugsXml.xml checkstyle-result.xml pmd.xml
-      # - name: Spotbug Report
-      #   uses: jwgmeligmeyling/spotbugs-github-action@master
-      #   with:
-      #     path: "**/spotbugsXml.xml"
-
-      # - name: Checkstyle Report
-      #   uses: jwgmeligmeyling/checkstyle-github-action@master
-      #   with:
-      #     path: "**/checkstyle-result.xml"
-
-      # - name: PMD Report
-      #   uses: jwgmeligmeyling/pmd-github-action@master
-      #   with:
-      #     path: "**/pmd.xml"
-
-      # - name: Junit Report
-      #   uses: scacap/action-surefire-report@v1
-      #   with:
-      #     report_paths: "**/surefire-reports/TEST-*.xml"
-      #     fail_if_no_tests: false 
-
-      # - name: Add Jacoco coverage to PR
-      #   continue-on-error: true
-      #   uses: madrapps/jacoco-report@v1.2
-      #   with:
-      #     paths: ${{ github.workspace }}/target/site/jacoco/jacoco.xml
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     min-coverage-overall: 75
-      #     min-coverage-changed-files: 75
-          
-      # - name: Deploy report to Github Pages
-      #   uses: peaceiris/actions-gh-pages@v3.8.0
-      #   with:
-      #     personal_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_branch: gh-pages
-      #     publish_dir: target/site/jacoco
-      #     destination_dir: jacoco
-          
-      # - name: Post the link to the report
-      #   uses: Sibz/github-status-action@v1
-      #   with: 
-      #       authToken: ${{secrets.GITHUB_TOKEN}}
-      #       context: 'JaCoCo Coverage Report'
-      #       state: 'success'
-      #       sha: ${{ github.event.pull_request.head.sha }}
-      #       target_url: ${{ inputs.ghp-url }}/jacoco
-
-      - name: Remove unused docker volumes
-        run: sudo docker volume prune -f
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          # platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_REGISTRY_URL}}/${{ github.event.repository.name }}:${{ env._DATE }}
+            ${{ secrets.DOCKER_REGISTRY_URL}}/${{ github.event.repository.name }}:latest
+          # ghcr.io/user/app:1.0.0                  
 
