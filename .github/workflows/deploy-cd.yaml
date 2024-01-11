@@ -16,7 +16,7 @@ jobs:
     #   ecr-repository: honeycomb/ace-api
     #   datadog-app-name: ace-api
       environment: prod
-    #   newman-project: newman
+    #   newman-project: newman 
     # secrets:
     #   argo-username: ${{ secrets.ARGO_USER}}
     #   argo-password: ${{ secrets.ARGO_PASSWORD }}
