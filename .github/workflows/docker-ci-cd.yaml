@@ -55,4 +55,15 @@ jobs:
             ${{ secrets.DOCKER_REGISTRY_URL}}/${{ github.event.repository.name }}:${{ env._DATE }}
             ${{ secrets.DOCKER_REGISTRY_URL}}/${{ github.event.repository.name }}:latest
           # ghcr.io/user/app:1.0.0                  
-
+## Deploy Phase
+  deploy:
+    uses: leelatechllc/.github/.github/workflows/deploy.yaml@main
+    with:
+    #   argo-project: ace-api-dev
+    #   ecr-repository: honeycomb/ace-api
+    #   datadog-app-name: ace-api
+      environment: prod
+    #   newman-project: newman 
+    # secrets:
+    #   argo-username: ${{ secrets.ARGO_USER}}
+    #   argo-password: ${{ secrets.ARGO_PASSWORD }} 
