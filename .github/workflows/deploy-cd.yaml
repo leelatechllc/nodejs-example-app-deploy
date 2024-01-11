@@ -11,11 +11,11 @@ concurrency: ${{ github.repository }}_${{ github.workflow }}
 jobs:
   deploy:
     uses: leelatechllc/.github/.github/workflows/deploy.yaml@main
-    # with:
+    with:
     #   argo-project: ace-api-dev
     #   ecr-repository: honeycomb/ace-api
     #   datadog-app-name: ace-api
-    #   environment: dev
+      environment: prod
     #   newman-project: newman
     # secrets:
     #   argo-username: ${{ secrets.ARGO_USER}}
