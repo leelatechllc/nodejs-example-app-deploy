@@ -19,4 +19,4 @@ jobs:
     #   newman-project: newman 
     # secrets:
     #   argo-username: ${{ secrets.ARGO_USER}}
-    #   argo-password: ${{ secrets.ARGO_PASSWORD }}
+    #   argo-password: ${{ secrets.ARGO_PASSWORD }} 
