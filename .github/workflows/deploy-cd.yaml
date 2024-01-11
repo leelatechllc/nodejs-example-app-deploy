@@ -10,7 +10,7 @@ concurrency: ${{ github.repository }}_${{ github.workflow }}
 
 jobs:
   deploy:
-    uses: leelatechllc/.github/.github/workflows/deploy-dev.yaml@main
+    uses: leelatechllc/.github/.github/workflows/deploy.yaml@main
     # with:
     #   argo-project: ace-api-dev
     #   ecr-repository: honeycomb/ace-api
