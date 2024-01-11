@@ -1,0 +1,22 @@
+name: Dev Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+concurrency: ${{ github.repository }}_${{ github.workflow }}
+
+jobs:
+  deploy:
+    uses: leelatechllc/.github/.github/workflows/deploy-dev.yaml@main
+    # with:
+    #   argo-project: ace-api-dev
+    #   ecr-repository: honeycomb/ace-api
+    #   datadog-app-name: ace-api
+    #   environment: dev
+    #   newman-project: newman
+    # secrets:
+    #   argo-username: ${{ secrets.ARGO_USER}}
+    #   argo-password: ${{ secrets.ARGO_PASSWORD }}
