@@ -7,7 +7,7 @@ on:
 env:
   MAVEN_OPTS: "-Xms1024m -Xmx2048m -XX:+UseG1GC -XX:+UseStringDeduplication -noverify -Dmaven.artifact.threads=50 -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.http.retryhandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=240 -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true"
   _JAVA_OPTIONS: "-Djava.io.tmpdir=/tmp/"
-  COMPANY: "Leelatech LLC"
+  COMPANY: "Leelatech LLC" 
 jobs:
   build:
     name: Build
